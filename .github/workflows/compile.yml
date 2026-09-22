@@ -40,7 +40,7 @@ jobs:
           fi
           cd src
           echo Compiling with ${{ matrix.compiler }}
-          make -f Makefile CC=${{ matrix.compiler }}
+          nmake -f Makefile.VC CC=${{ matrix.compiler }}
           if ls *.o >/dev/null 2>&1; then
             echo 'Compilation finished, removing output files'
             rm -f *.o
