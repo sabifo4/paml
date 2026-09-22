@@ -1,0 +1,53 @@
+name: Compiling PAML
+
+on:
+  # Trigger action manually
+  workflow_dispatch:
+  schedule:
+    - cron: '30 15 * * 1'
+      timezone: "Europe/London"
+    
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-latest, macos-15-intel]
+        compiler: [gcc, clang]
+        # MacOS needs the compiler version, does not work with just 'latest'
+        include:
+            - { os: macos-latest,   compiler: gcc-16 }
+            - { os: macos-15-intel,   compiler: gcc-16 }
+        exclude:
+            - { os: macos-latest,   compiler: gcc }
+            - { os: macos-15-intel,   compiler: gcc }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Compile PAML on Windows
+        id: cc-win
+        if: ${{ matrix.os == 'windows*' }}
+        shell: bash
+        run: |
+          # Check if `make` exists, install otherwise
+          is_make=`which make`
+          if [ ! "$is_make" ]; then
+            choco install make
+          fi
+          cd src
+          echo Compiling with ${{ matrix.compiler }}
+          make -f Makefile CC=${{ matrix.compiler }}
+          if [ -f *\.o ]; then
+            echo 'Compilation finished, removing output files'
+            rm *\.o
+          fi
+      - name: Compile PAML on Linux and Unix
+        id: cc-lin-unix
+        if: ${{ matrix.os == 'windows*' || matrix.os == 'ubuntu*' }}
+        shell: bash
+        run: |
+          cd src
+          echo Compiling with ${{ matrix.compiler }}
+          make -f Makefile CC=${{ matrix.compiler }}
+          if [ -f *\.o ]
+            echo 'Compilation finished, removing output files'
+            rm *\.o
+          fi
