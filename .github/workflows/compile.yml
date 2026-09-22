@@ -17,28 +17,33 @@ jobs:
         # MacOS needs the compiler version, does not work with just 'latest'
         include:
             - { os: macos-latest,   compiler: gcc-16 }
-            - { os: macos-15-intel,   compiler: gcc-16 }
+            - { os: macos-15-intel, compiler: gcc-16 }
         exclude:
             - { os: macos-latest,   compiler: gcc }
-            - { os: macos-15-intel,   compiler: gcc }
+            - { os: macos-15-intel, compiler: gcc }
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Check out repository
+        # Clone the repo so that the rest of actions can run
+        uses: actions/checkout@v7
       - name: Compile PAML on Windows
         id: cc-win
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: bash
         run: |
           # Check if `make` exists, install otherwise
-          is_make=`which make`
-          if [ ! "$is_make" ]; then
-            choco install make
+          if command -v make >/dev/null 2>&1; then
+            echo "'make' is already available!"
+          else
+            echo "'make' not found, installing... ..."
+            choco install make -y
           fi
           cd src
           echo Compiling with ${{ matrix.compiler }}
           make -f Makefile CC=${{ matrix.compiler }}
-          if [ -f *\.o ]; then
+          if ls *.o >/dev/null 2>&1; then
             echo 'Compilation finished, removing output files'
-            rm *\.o
+            rm -f *.o
           fi
       - name: Compile PAML on Linux and Unix
         id: cc-lin-unix
@@ -46,9 +51,17 @@ jobs:
         shell: bash
         run: |
           cd src
+          if [[ "${{ matrix.compiler }}" =~ "clang" && "${{ matrix.os }}" =~ "ubuntu" ]]; then
+            if command -v clang >/dev/null 2>&1; then
+              echo "'clang' is already available!"
+            else
+              echo "'clang' not found, installing... ..."
+              sudo apt-get update && sudo apt-get install -y clang
+            fi
+          fi
           echo Compiling with ${{ matrix.compiler }}
           make -f Makefile CC=${{ matrix.compiler }}
-          if [ -f *\.o ]
+          if ls *.o >/dev/null 2>&1; then
             echo 'Compilation finished, removing output files'
-            rm *\.o
+            rm -f *.o
           fi
