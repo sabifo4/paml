@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Compile PAML on Windows
         id: cc-win
-        if: ${{ matrix.os == 'windows*' }}
+        if: ${{ startsWith(matrix.os, 'windows') }}
         shell: bash
         run: |
           # Check if `make` exists, install otherwise
@@ -42,7 +42,7 @@ jobs:
           fi
       - name: Compile PAML on Linux and Unix
         id: cc-lin-unix
-        if: ${{ matrix.os == 'windows*' || matrix.os == 'ubuntu*' }}
+        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
         shell: bash
         run: |
           cd src
