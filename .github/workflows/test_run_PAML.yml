@@ -61,11 +61,13 @@ jobs:
         run: |
           # Run MCMCtree with cross-bracing example
           chmod +x ./bin/*
-          ./bin/mcmctree ./examples/dating-cross-bracing/mcmctree-bracing.ctl
+          cd ./examples/dating-cross-bracing/
+          ../../bin/mcmctree mcmctree-bracing.ctl
       - name: Run MCMCtree on Windows
         id: run-mcmctree-win
         shell: cmd
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
           # Run MCMCtree with cross-bracing example
-          .\bin\mcmctree.exe .\examples\dating-cross-bracing\mcmctree-bracing.ctl
+          cd .\examples\dating-cross-bracing
+          ..\..\bin\mcmctree.exe mcmctree-bracing.ctl
