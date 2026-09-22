@@ -16,8 +16,8 @@ jobs:
         compiler: [gcc, clang]
         # MacOS needs the compiler version, does not work with just 'latest'
         include:
-            - { os: macos-latest,   compiler: gcc-16 }
-            - { os: macos-15-intel, compiler: gcc-16 }
+            - { os: macos-latest,   compiler: gcc-15 }
+            - { os: macos-15-intel, compiler: gcc-15 }
         exclude:
             - { os: macos-latest,   compiler: gcc }
             - { os: macos-15-intel, compiler: gcc }
