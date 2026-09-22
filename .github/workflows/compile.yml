@@ -11,13 +11,19 @@ on:
 jobs:
   build:
     strategy:
+      # All matrix combinations are tested even if one fails
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest, ubuntu-24.04-arm, windows-latest, windows-11-arm, macos-latest, macos-15-intel]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest, macos-15-intel]
         compiler: [gcc, clang]
         # MacOS needs the compiler version, does not work with just 'latest'
+        # Windows will have its own environment and compiler, should be
+        # added separately
         include:
             - { os: macos-latest,   compiler: gcc-15 }
             - { os: macos-15-intel, compiler: gcc-15 }
+            - { os: windows-latest }
+            - { os: windows-11-arm }
         exclude:
             - { os: macos-latest,   compiler: gcc }
             - { os: macos-15-intel, compiler: gcc }
@@ -26,25 +32,18 @@ jobs:
       - name: Check out repository
         # Clone the repo so that the rest of actions can run
         uses: actions/checkout@v7
+      - name: Set up MSVC environment for Windows compilation
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.os == 'windows-11-arm' && 'arm64' || 'amd64' }}
       - name: Compile PAML on Windows
         id: cc-win
         if: ${{ startsWith(matrix.os, 'windows') }}
-        shell: bash
+        shell: cmd
         run: |
-          # Check if `make` exists, install otherwise
-          if command -v make >/dev/null 2>&1; then
-            echo "'make' is already available!"
-          else
-            echo "'make' not found, installing... ..."
-            choco install make -y
-          fi
           cd src
-          echo Compiling with ${{ matrix.compiler }}
-          nmake -f Makefile.VC CC=${{ matrix.compiler }}
-          if ls *.o >/dev/null 2>&1; then
-            echo 'Compilation finished, removing output files'
-            rm -f *.o
-          fi
+          nmake -f Makefile.VC
       - name: Compile PAML on Linux and Unix
         id: cc-lin-unix
         if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
