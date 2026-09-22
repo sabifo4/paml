@@ -44,13 +44,13 @@ jobs:
         run: |
           cd src
           nmake -f Makefile.VC
-      - name: Compile PAML on Linux and Unix
-        id: cc-lin-unix
-        if: ${{ startsWith(matrix.os, 'macos') || startsWith(matrix.os, 'ubuntu') }}
+      - name: Compile PAML on Linux
+        id: cc-lin
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
         shell: bash
         run: |
           cd src
-          if [[ "${{ matrix.compiler }}" =~ "clang" && "${{ matrix.os }}" =~ "ubuntu" ]]; then
+          if [[ "${{ matrix.compiler }}" =~ "clang" ]]; then
             if command -v clang >/dev/null 2>&1; then
               echo "'clang' is already available!"
             else
@@ -60,6 +60,23 @@ jobs:
           fi
           echo Compiling with ${{ matrix.compiler }}
           make -f Makefile CC=${{ matrix.compiler }}
+          if ls *.o >/dev/null 2>&1; then
+            echo 'Compilation finished, removing output files'
+            rm -f *.o
+          fi
+      - name: Compile PAML on Unix
+        id: cc-unix
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        shell: bash
+        run: |
+          cd src
+          echo Compiling with ${{ matrix.compiler }}
+          # Issue: macOS + gcc-15 has compilation issues with MCMCtree
+          if [[ "${{ matrix.os }}" =~ "macos-latest" && "${{ matrix.compiler }}" =~ "gcc-15" ]]; then
+            make -f Makefile CC=${{ matrix.compiler }} CFLAGS="-O2 -Wall -Wno-unused-variable -Wno-unused-result"
+          else
+            make -f Makefile CC=${{ matrix.compiler }}
+          fi
           if ls *.o >/dev/null 2>&1; then
             echo 'Compilation finished, removing output files'
             rm -f *.o
