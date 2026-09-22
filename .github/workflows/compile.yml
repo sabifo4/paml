@@ -73,7 +73,7 @@ jobs:
           echo Compiling with ${{ matrix.compiler }}
           # Issue: macOS + gcc-15 has compilation issues with MCMCtree
           if [[ "${{ matrix.os }}" =~ "macos-latest" && "${{ matrix.compiler }}" =~ "gcc-15" ]]; then
-            make -f Makefile CC=${{ matrix.compiler }} CFLAGS="-O2 -Wall -Wno-unused-variable -Wno-unused-result"
+            make -f Makefile CC=${{ matrix.compiler }} CFLAGS="-O1 -Wall -Wno-unused-variable -Wno-unused-result"
           else
             make -f Makefile CC=${{ matrix.compiler }}
           fi
