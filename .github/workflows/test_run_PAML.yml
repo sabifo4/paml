@@ -63,12 +63,15 @@ jobs:
             chmod +x ./bin/*
             cd ./test/
             for program in *; do
-                echo Tests with PAML program $program
-                for i in "$program"/*ctl; do
-                    name=$( echo $i | sed 's/..*\_//' )
-                    printf "\nTest: "$name"\n"
-                    ../bin/$program $i
+                program="${program%/}"
+                echo "Tests with PAML program $program"
+                cd "$program"
+                for i in *.ctl; do
+                    name=$( echo "$i" | sed 's/..*_//' )
+                    printf "\nTest: %s\n" "$name"
+                    ../../bin/$program "$i"
                 done
+                cd ..
             done
       - name: Run MCMCtree on Windows
         id: run-mcmctree-win
@@ -76,23 +79,31 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
             # Run MCMCtree with cross-bracing example
-            setlocal enabledelayedexpansion
             cd .\test
-            set "failed=0"
             for /d %%p in (*) do (
-            echo Tests with PAML program %%p
-                for %%i in ("%%p\*.ctl") do (
-                    echo.
-                    echo Test: %%~nxi
-                    ..\bin\%%p.exe "%%i"
-                    if errorlevel 1 (
-                    echo ##[error] FAILED: %%p on %%i
-                    set "failed=1"
-                    )
+              echo Tests with PAML program %%p
+              pushd "%%p"
+              for %%i in (*.ctl) do (
+                call :getname "%%~nxi"
+                echo.
+                echo Test: !name!
+                ..\..\bin\%%p.exe "%%i"
+                if errorlevel 1 (
+                  echo ##[error] FAILED: %%p on %%i
+                  set "failed=1"
                 )
+              )
+              popd
             )
-            if "!failed!"=="1" (
-            echo One or more PAML tests failed.
-            exit /b 1
-            )
+            if "!failed!"=="1" ( echo One or more PAML tests failed. & exit /b 1 )
             echo All PAML tests passed.
+            exit /b 0
+
+            :getname
+            set "name=%~1"
+            :_strip
+            if not "!name!"=="!name:*_=!" (
+              set "name=!name:*_=!"
+              goto _strip
+            )
+            exit /b
