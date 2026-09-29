@@ -66,14 +66,16 @@ jobs:
                 program="${program%/}"
                 echo "Tests with PAML program $program"
                 cd "$program"
-                for i in *.ctl; do
-                    name=$( echo "$i" | sed 's/..*_//' )
-                    printf "\nTest: %s\n" "$name"
+                if [[ "$program" == "ds" || "$program" == "evolver" ]]; then
+                  for i in *.txt; do
+                    printf "\n ~~~> Testing "$program"\n"
                     ../../bin/$program "$i"
-                done
-                if [[ "$program" == "ds" ]]; then
-                  for i in ds_test*txt; do
-                    ../../bin/$program "$i"
+                  done
+                else
+                  for i in *.ctl; do
+                      name=$( echo "$i" | sed 's/..*_//' )
+                      printf "\n ~~~> Test: %s\n" "$name"
+                      ../../bin/$program "$i"
                   done
                 fi
                 cd ..
@@ -91,17 +93,17 @@ jobs:
             for /d %%p in (*) do (
               echo Tests with PAML program %%p
               pushd "%%p"
-              for %%i in (*.ctl) do (
-                call :getname "%%~nxi"
-                echo.
-                echo Test: !name!
-                ..\..\bin\%%p.exe "%%i"
-                if errorlevel 1 ( echo ##[error] FAILED: %%p on %%i & set "failed=1" )
-              )
               if /i "%%p"=="ds" (
-                for %%t in (ds_test*txt) do (
-                  ..\..\bin\ds.exe "%%t"
-                  if errorlevel 1 ( echo ##[error] FAILED: ds on %%t & set "failed=1" )
+                call :runtxt "%%p"
+              ) else if /i "%%p"=="evolver" (
+                call :runtxt "%%p"
+              ) else (
+                for %%i in (*.ctl) do (
+                  call :getname "%%~nxi"
+                  echo.
+                  echo  ~~~^> Test: !name!
+                  ..\..\bin\%%p.exe "%%i"
+                  if errorlevel 1 ( echo ##[error] FAILED: %%p on %%i & set "failed=1" )
                 )
               )
               popd
@@ -109,6 +111,15 @@ jobs:
             if "!failed!"=="1" ( echo One or more PAML tests failed. & exit /b 1 )
             echo All PAML tests passed.
             exit /b 0
+
+            :runtxt
+            for %%t in (*.txt) do (
+              echo.
+              echo  ~~~^> Testing %~1
+              ..\..\bin\%~1.exe "%%t"
+              if errorlevel 1 ( echo ##[error] FAILED: %~1 on %%t & set "failed=1" )
+            )
+            exit /b
 
             :getname
             set "name=%~1"
