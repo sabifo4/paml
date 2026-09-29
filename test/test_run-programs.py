@@ -19,7 +19,7 @@ BIN_DIR = REPO_ROOT/"bin"
 TEST_DIR = REPO_ROOT/"test"
 print('\n[[ PATHS]]\n')
 print(f'Path to root: {REPO_ROOT}\n')
-print(f'Path to \"bin\" directory: {REPO_ROOT}\n')
+print(f'Path to \"bin\" directory: {BIN_DIR}\n')
 print(f'Path to \"test\" directoryt: {TEST_DIR}\n')
 
 # Set suffix "exe" for Windows binaries
@@ -87,10 +87,11 @@ def main() -> int:
         print(f"\nTests with PAML program {program}")
         # Options for different programs
         # NOTE: `args` must be a list!
+        # NOTE: use `Path(ds_f).name` as it is compatible across different OS
         if program == "ds":
             for ds_f in glob.glob(program + "/*.txt"):
                 print(f"~~> Test with PAML program {program}: summarising MCMC file")
-                run(program = program, args = [ds_f.rsplit("/")[1]], cwd = TEST_DIR/program)
+                run(program = program, args = [Path(ds_f).name], cwd = TEST_DIR/program)
         elif program == "evolver":
             if not glob.glob(program + "/*dat" ):
                 sys.exit( "No DAT files to run evolver")
@@ -106,7 +107,7 @@ def main() -> int:
             for ctl_f in glob.glob(program+"/*.ctl"):
                 test_name = re.sub(pattern = r'\.ctl', repl = '', string = re.sub(pattern = '..*_', repl = '', string = ctl_f))
                 print(f"~~> Test with PAML program {program}: {test_name}")
-                run(program = program, args = [ctl_f.rsplit("/")[1]], cwd = TEST_DIR/program)
+                run(program = program, args = [Path(ctl_f).name], cwd = TEST_DIR/program)
     # If a program/s has/have failed...
     end = time.perf_counter()
     elapsed = end - start
