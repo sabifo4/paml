@@ -1,7 +1,7 @@
       seqfile = data/aln_brown.nuc 
      treefile = data/tree_brown.tree
 
-      outfile = mlb       * main result file
+      outfile = mlb * main result file
         noisy = 2   * 0,1,2,3: how much rubbish on the screen
       verbose = 0   * 1: detailed output, 0: concise output
       runmode = 0   * 0: user tree;  1: semi-automatic;  2: automatic
@@ -15,10 +15,10 @@
 *        ndata = 100
         clock = 0   * 0:no clock, 1:clock; 2:local clock; 3:CombinedAnalysis
     fix_kappa = 0   * 0: estimate kappa; 1: fix kappa at value below; 2: kappa for branches
-        kappa = 5  * initial or fixed kappa
+        kappa = 5   * initial or fixed kappa
 
     fix_alpha = 0   * 0: estimate alpha; 1: fix alpha at value below
-        alpha = 0.5   * initial or fixed alpha, 0:infinity (constant rate)
+        alpha = 0.5 * initial or fixed alpha, 0:infinity (constant rate)
        Malpha = 0   * 1: different alpha's for genes, 0: one alpha
         ncatG = 5   * # of categories in the dG, AdG, or nparK models of rates
         nparK = 0   * rate-class models. 1:rK, 2:rK&fK, 3:rK&MK(1/K), 4:rK&MK 
@@ -28,7 +28,7 @@
  RateAncestor = 0   * (0,1,2): rates (alpha>0) or ancestral states
 
    Small_Diff = 7e-6
-    cleandata = 1  * remove sites with ambiguity data (1:yes, 0:no)?
+    cleandata = 1   * remove sites with ambiguity data (1:yes, 0:no)?
 *        icode = 0  * (with RateAncestor=1. try "GC" in data,model=4,Mgene=4)
 *  fix_blength = 1  * 0: ignore, -1: random, 1: initial, 2: fixed, 3: proportional
-       method = 0  * Optimization method 0: simultaneous; 1: one branch a time
+       method = 0   * Optimization method 0: simultaneous; 1: one branch a time
