@@ -71,6 +71,11 @@ jobs:
                     printf "\nTest: %s\n" "$name"
                     ../../bin/$program "$i"
                 done
+                if [[ "$program" == "ds" ]]; then
+                  for i in ds_test*txt; do
+                    ../../bin/$program "$i"
+                  done
+                fi
                 cd ..
             done
       - name: Run MCMCtree on Windows
@@ -79,6 +84,9 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
             # Run MCMCtree with cross-bracing example
+            setlocal enabledelayedexpansion
+            set "failed=0"
+
             cd .\test
             for /d %%p in (*) do (
               echo Tests with PAML program %%p
@@ -88,9 +96,12 @@ jobs:
                 echo.
                 echo Test: !name!
                 ..\..\bin\%%p.exe "%%i"
-                if errorlevel 1 (
-                  echo ##[error] FAILED: %%p on %%i
-                  set "failed=1"
+                if errorlevel 1 ( echo ##[error] FAILED: %%p on %%i & set "failed=1" )
+              )
+              if /i "%%p"=="ds" (
+                for %%t in (ds_test*txt) do (
+                  ..\..\bin\ds.exe "%%t"
+                  if errorlevel 1 ( echo ##[error] FAILED: ds on %%t & set "failed=1" )
                 )
               )
               popd
@@ -102,8 +113,5 @@ jobs:
             :getname
             set "name=%~1"
             :_strip
-            if not "!name!"=="!name:*_=!" (
-              set "name=!name:*_=!"
-              goto _strip
-            )
+            if not "!name!"=="!name:*_=!" ( set "name=!name:*_=!" & goto _strip )
             exit /b
