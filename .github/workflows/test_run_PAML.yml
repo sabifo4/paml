@@ -54,20 +54,45 @@ jobs:
         with:
           name: paml-binaries-${{ matrix.os }}-${{ matrix.compiler }}
           path: bin
-      - name: Run MCMCtree on Linux and MacOS
+      - name: Run PAML on Linux and MacOS
         id: run-mcmctree-lin-unix
         shell: bash
         if: ${{ startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos') }}
         run: |
-          # Run MCMCtree with cross-bracing example
-          chmod +x ./bin/*
-          cd ./examples/dating-cross-bracing/
-          ../../bin/mcmctree mcmctree-bracing.ctl
+            # Run PAML programs
+            chmod +x ./bin/*
+            cd ./test/
+            for program in *; do
+                echo Tests with PAML program $program
+                for i in "$program"/*ctl; do
+                    name=$( echo $i | sed 's/..*\_//' )
+                    printf "\nTest: "$name"\n"
+                    ../bin/$program $i
+                done
+            done
       - name: Run MCMCtree on Windows
         id: run-mcmctree-win
         shell: cmd
         if: ${{ startsWith(matrix.os, 'windows') }}
         run: |
-          # Run MCMCtree with cross-bracing example
-          cd .\examples\dating-cross-bracing
-          ..\..\bin\mcmctree.exe mcmctree-bracing.ctl
+            # Run MCMCtree with cross-bracing example
+            setlocal enabledelayedexpansion
+            cd .\test
+            set "failed=0"
+            for /d %%p in (*) do (
+            echo Tests with PAML program %%p
+                for %%i in ("%%p\*.ctl") do (
+                    echo.
+                    echo Test: %%~nxi
+                    ..\bin\%%p.exe "%%i"
+                    if errorlevel 1 (
+                    echo ##[error] FAILED: %%p on %%i
+                    set "failed=1"
+                    )
+                )
+            )
+            if "!failed!"=="1" (
+            echo One or more PAML tests failed.
+            exit /b 1
+            )
+            echo All PAML tests passed.
