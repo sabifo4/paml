@@ -63,22 +63,27 @@ jobs:
             chmod +x ./bin/*
             cd ./test/
             for program in *; do
-                program="${program%/}"
-                echo "Tests with PAML program $program"
-                cd "$program"
-                if [[ "$program" == "ds" || "$program" == "evolver" ]]; then
-                  for i in *.txt; do
-                    printf "\n ~~~> Testing "$program"\n"
+              program="${program%/}"
+              echo "Tests with PAML program $program"
+              cd "$program"
+              if [[ "$program" == "ds" ]]; then
+                for i in *.txt; do
+                  printf "\n ~~~> Testing %s\n" "$program"
+                  ../../bin/$program "$i"
+                done
+              elif [[ "$program" == "evolver" ]]; then
+                printf "\n ~~~> Testing %s\n" "$program"
+                ../../bin/$program 5 MCbase.dat
+                ../../bin/$program 6 MCcodon.dat
+                ../../bin/$program 7 MCaa.dat
+              else
+                for i in *.ctl; do
+                    name=$( echo "$i" | sed 's/..*_//' )
+                    printf "\n ~~~> Test: %s\n" "$name"
                     ../../bin/$program "$i"
-                  done
-                else
-                  for i in *.ctl; do
-                      name=$( echo "$i" | sed 's/..*_//' )
-                      printf "\n ~~~> Test: %s\n" "$name"
-                      ../../bin/$program "$i"
-                  done
-                fi
-                cd ..
+                done
+              fi
+              cd ..
             done
       - name: Run MCMCtree on Windows
         id: run-mcmctree-win
@@ -94,9 +99,21 @@ jobs:
               echo Tests with PAML program %%p
               pushd "%%p"
               if /i "%%p"=="ds" (
-                call :runtxt "%%p"
+                for %%t in (*.txt) do (
+                  echo.
+                  echo  ~~~^> Testing %%p
+                  ..\..\bin\%%p.exe "%%t"
+                  if errorlevel 1 ( echo ##[error] FAILED: %%p on %%t & set "failed=1" )
+                )
               ) else if /i "%%p"=="evolver" (
-                call :runtxt "%%p"
+                echo.
+                echo  ~~~^> Testing %%p
+                ..\..\bin\evolver.exe 5 MCbase.dat
+                if errorlevel 1 ( echo ##[error] FAILED: evolver on MCbase.dat & set "failed=1" )
+                ..\..\bin\evolver.exe 6 MCcodon.dat
+                if errorlevel 1 ( echo ##[error] FAILED: evolver on MCcodon.dat & set "failed=1" )
+                ..\..\bin\evolver.exe 7 MCaa.dat
+                if errorlevel 1 ( echo ##[error] FAILED: evolver on MCaa.dat & set "failed=1" )
               ) else (
                 for %%i in (*.ctl) do (
                   call :getname "%%~nxi"
@@ -111,15 +128,6 @@ jobs:
             if "!failed!"=="1" ( echo One or more PAML tests failed. & exit /b 1 )
             echo All PAML tests passed.
             exit /b 0
-
-            :runtxt
-            for %%t in (*.txt) do (
-              echo.
-              echo  ~~~^> Testing %~1
-              ..\..\bin\%~1.exe "%%t"
-              if errorlevel 1 ( echo ##[error] FAILED: %~1 on %%t & set "failed=1" )
-            )
-            exit /b
 
             :getname
             set "name=%~1"
