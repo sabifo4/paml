@@ -3,6 +3,8 @@ name: Compiling PAML
 on:
   # Trigger action manually
   workflow_dispatch:
+  # This is a reusable action that will be called by other actions
+  workflow_call:
   pull_request:
   schedule:
     - cron: '30 15 * * 1'
@@ -44,6 +46,9 @@ jobs:
         run: |
           cd src
           nmake -f Makefile.VC
+          # Create bin directory and moved binaries there
+          if not exist ..\bin mkdir ..\bin
+          move *.exe ..\bin
       - name: Compile PAML on Linux
         id: cc-lin
         if: ${{ startsWith(matrix.os, 'ubuntu') }}
@@ -64,6 +69,9 @@ jobs:
             echo 'Compilation finished, removing output files'
             rm -f *.o
           fi
+          # Create bin directory and moved binaries there
+          mkdir ../bin
+          mv baseml basemlg chi2 codeml ds evolver infinitesites mcmctree pamp yn00 ../bin
       - name: Compile PAML on Unix
         id: cc-unix
         if: ${{ startsWith(matrix.os, 'macos') }}
@@ -81,3 +89,24 @@ jobs:
             echo 'Compilation finished, removing output files'
             rm -f *.o
           fi
+          # Create bin directory and moved binaries there
+          mkdir ../bin
+          mv baseml basemlg chi2 codeml ds evolver infinitesites mcmctree pamp yn00 ../bin
+      - name: Upload Windows PAML binaries
+        if: ${{ startsWith(matrix.os, 'windows') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: paml-binaries-${{ matrix.os }}-cl
+          path: bin
+      - name: Upload Linux PAML binaries
+        if: ${{ startsWith(matrix.os, 'ubuntu') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: paml-binaries-${{ matrix.os }}-${{ matrix.compiler }}
+          path: bin
+      - name: Upload MacOS PAML binaries
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: paml-binaries-${{ matrix.os }}-${{ matrix.compiler }}
+          path: bin
