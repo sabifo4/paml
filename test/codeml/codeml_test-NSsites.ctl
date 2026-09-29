@@ -1,5 +1,5 @@
       seqfile = data/aln_HIVenvSweden.txt    * sequence data file name
-     treefile = data/tree_HIVenvSweden.trees   * tree structure file name
+     treefile = data/tree_HIVenvSweden.tree  * tree structure file name
 
       outfile = mlc          * main result file name
         noisy = 3   * 0,1,2,3,9: how much rubbish on the screen
