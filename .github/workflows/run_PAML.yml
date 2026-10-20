@@ -63,10 +63,10 @@ jobs:
         shell: bash
         run: |
           cd test
-          python test_run-programs.py
+          python run-programs.py
       - name: Run PAML on Windows
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: cmd
         run: |
           cd test
-          python test_run-programs.py 
+          python run-programs.py 
