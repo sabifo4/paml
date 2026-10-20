@@ -2,8 +2,6 @@
 """Run PAML programs for all available tests"""
 
 import glob
-import os
-import platform
 import re
 import subprocess
 import sys
@@ -11,35 +9,22 @@ import time
 from datetime import datetime
 from pathlib import Path
 
+# Import global paths and FUN for binary type
+# from `paml_settings.py`
+from paml_settings import BIN_DIR, REPO_ROOT, TEST_DIR, binary_for
+
 ## [[ SET GLOBAL PATHS ]] ##
 
-# Set up working directory
-REPO_ROOT = Path.cwd().resolve().parent 
-BIN_DIR = REPO_ROOT/"bin"
-TEST_DIR = REPO_ROOT/"test"
+# Check working directory
 print('\n[[ PATHS]]\n')
 print(f'Path to root: {REPO_ROOT}\n')
 print(f'Path to \"bin\" directory: {BIN_DIR}\n')
-print(f'Path to \"test\" directoryt: {TEST_DIR}\n')
-
-# Set suffix "exe" for Windows binaries
-if platform.system() == "Windows":
-    EXE_SUFFIX = ".exe"
-else:
-    EXE_SUFFIX = ""
+print(f'Path to \"test\" directory: {TEST_DIR}\n')
 
 # Collect failures
 failures = []
 
 ## [[ FUNCTIONS ]]
-
-def binary_for(program: str) -> Path:
-    """Extract full path to PAML program"""
-    exe = BIN_DIR/(program + EXE_SUFFIX)
-    # When not on Windows, give executable permissions 
-    if EXE_SUFFIX == "" and exe.exists():
-        os.chmod(exe, 0o755)
-    return exe
 
 def run(program: str, args, cwd: Path) -> None:
     """Run one program invocation, print a header, record failure on non-zero exit."""
@@ -76,7 +61,7 @@ def run(program: str, args, cwd: Path) -> None:
 
 # Returns 0 (pass) or 1 (fail)
 def main() -> int:
-    # Start counter
+    # Start timer
     print(f'\nAnalyses start on {datetime.now().strftime("%Y-%m-%d at %H:%M:%S")}')
     start = time.perf_counter()
     for program_dir in sorted(TEST_DIR.iterdir()):
@@ -89,11 +74,11 @@ def main() -> int:
         # NOTE: `args` must be a list!
         # NOTE: use `Path(ds_f).name` as it is compatible across different OS
         if program == "ds":
-            for ds_f in glob.glob(program + "/*.txt"):
+            for ds_f in glob.glob("inputs/" + program + "/*.txt"):
                 print(f"~~> Test with PAML program {program}: summarising MCMC file")
                 run(program = program, args = [Path(ds_f).name], cwd = TEST_DIR/program)
         elif program == "evolver":
-            if not glob.glob(program + "/*dat" ):
+            if not glob.glob("inputs/" + program + "/*dat"):
                 sys.exit( "No DAT files to run evolver")
             print(f"~~> Test with PAML program {program}: simulating with nucleotide data")
             run(program = program, args = ["5", "MCbase.dat"], cwd = TEST_DIR/program)
@@ -102,9 +87,9 @@ def main() -> int:
             print(f"~~> Test with PAML program {program}: simulating with amino acid data")
             run(program = program, args = ["7", "MCaa.dat"], cwd = TEST_DIR/program)
         else:
-            if not glob.glob(program + "/*ctl" ):
+            if not glob.glob("inputs/" + program + "/*ctl"):
                 sys.exit(f"No control files to run PAML program {program}")
-            for ctl_f in glob.glob(program+"/*.ctl"):
+            for ctl_f in glob.glob("inputs/" + program + "/*.ctl"):
                 test_name = re.sub(pattern = r'\.ctl', repl = '', string = re.sub(pattern = '..*_', repl = '', string = ctl_f))
                 print(f"~~> Test with PAML program {program}: {test_name}")
                 run(program = program, args = [Path(ctl_f).name], cwd = TEST_DIR/program)
