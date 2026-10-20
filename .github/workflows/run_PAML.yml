@@ -63,10 +63,13 @@ jobs:
         shell: bash
         run: |
           cd test
-          python run-programs.py
+          my_dir=$( pwd )
+          echo This is $my_dir
+          ls *
+          python run_programs.py
       - name: Run PAML on Windows
         if: ${{ startsWith(matrix.os, 'windows') }}
         shell: cmd
         run: |
           cd test
-          python run-programs.py 
+          python run_programs.py 
