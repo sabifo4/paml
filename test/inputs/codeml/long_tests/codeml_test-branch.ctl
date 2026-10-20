@@ -1,6 +1,6 @@
-      seqfile = data/aln_Mx.phy               * Path to the alignment file
-     treefile = data/tree_Mx_branch_bird.tree * Path to the tree file
-      outfile = out_bird_branchsite.txt       * Path to the output file
+      seqfile = data/aln_Mx_simul50cod.phy     * Path to the alignment file
+     treefile = data/tree_Mx_branch_bird.tree  * Path to the tree file
+      outfile = out_bird_branch.txt            * Path to the output file
    
         noisy = 3              * How much rubbish on the screen
       verbose = 1              * More or less detailed report
@@ -11,9 +11,9 @@
     cleandata = 0              * Remove sites with ambiguity data?
 		
         model = 2        * Models for ω varying across lineages
-	    NSsites = 2        * Models for ω varying across sites
+	    NSsites = 0        * Models for ω varying across sites
     CodonFreq = 7        * Codon frequencies
-   	  estFreq = 0        * Use observed freqs or estimate freqs by ML
+	    estFreq = 0        * Use observed freqs or estimate freqs by ML
         clock = 0        * Clock model
-    fix_omega = 1        * Estimate or fix omega
-        omega = 1        * Initial or fixed omega
+    fix_omega = 0        * Estimate or fix omega
+        omega = 0.5      * Initial or fixed omega

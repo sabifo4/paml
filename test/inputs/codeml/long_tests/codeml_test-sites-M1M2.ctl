@@ -1,6 +1,6 @@
-      seqfile = data/aln_Mx.phy           * Path to the alignment file
-     treefile = data/tree_Mx_unroot.tree  * Path to the tree file
-      outfile = out_sites.txt             * Path to the output file
+      seqfile = data/aln_Mx_simul50cod.phy  * Path to the alignment file
+     treefile = data/tree_Mx_unroot.tree    * Path to the tree file
+      outfile = out_sites.txt               * Path to the output file
    
         noisy = 3              * How much rubbish on the screen
       verbose = 1              * More or less detailed report

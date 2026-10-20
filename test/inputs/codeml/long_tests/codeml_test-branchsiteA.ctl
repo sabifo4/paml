@@ -1,4 +1,4 @@
-      seqfile = data/aln_Mx.phy               * Path to the alignment file
+      seqfile = data/aln_Mx_simul50cod.phy    * Path to the alignment file
      treefile = data/tree_Mx_branch_bird.tree * Path to the tree file
       outfile = out_bird_branchsite.txt       * Path to the output file
    
